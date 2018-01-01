@@ -26,9 +26,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -62,9 +64,16 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
         View emptyView = findViewById(R.id.empty_view);
         petListView.setEmptyView(emptyView);
+        petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Intent editData= new Intent(CatalogActivity.this     ,EditorActivity.class);
+                Uri currentPetUri=ContentUris.withAppendedId(PetEntry.CONTENT_URI,id);
+                editData.setData(currentPetUri);
+                startActivity(editData);
 
-        ListView displayView = (ListView) findViewById(R.id.list);
-
+            }
+        });
         //displayDatabaseInfo();
         mPetCursorAdapter= new PetCursorAdapter(this,null);
         petListView.setAdapter(mPetCursorAdapter);
@@ -93,7 +102,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                deleteAllPets();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -144,7 +153,10 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     public void onLoaderReset(Loader<Cursor> loader) {
         mPetCursorAdapter.swapCursor(null);
     }
+    private void deleteAllPets() {
+        int rowsDeleted = getContentResolver().delete(PetEntry.CONTENT_URI, null, null);
+        Log.v("CatalogActivity", rowsDeleted + " rows deleted from pet database");
+    }
 
-    ;
 
 }
